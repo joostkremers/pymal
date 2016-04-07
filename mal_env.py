@@ -65,4 +65,4 @@ class MalEnv():
             return env.data[symbol]
         else:
             return MalError("SymbolError",
-                            "Symbol value is void '{}'".format(symbol))
+                            "Symbol value is void: '{}'".format(symbol))
