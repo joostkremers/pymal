@@ -20,6 +20,8 @@ def READ(line):
 
 def EVAL(ast, env):
     while True:
+        if ast is None:  # comments
+            return None
         if type(ast) is MalError:
             return ast
         elif type(ast) is not MalList:

@@ -26,6 +26,9 @@ def pr_str(obj, print_readably=False):
             string = '"' + string + '"'
         return string
 
+    elif obj is None:  # in the case of comments
+        return ""
+
     # If none of the above:
     else:
         return str(obj)

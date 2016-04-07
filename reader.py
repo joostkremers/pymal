@@ -75,7 +75,7 @@ def read_form(form):
     elif token in reader_macros:
         return apply_reader_macro(form, token)
     elif token == '':
-        return MalType("comment")
+        return None
     else:
         return read_atom(token)
 
