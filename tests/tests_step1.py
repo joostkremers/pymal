@@ -8,6 +8,7 @@ class TestStep1(unittest.TestCase):
     def test_read_nil_true_false(self):
         self.assertEqual(pymal.READ('nil'), MAL_NIL)
         self.assertEqual(pymal.READ('true'), MalBoolean(True))
+        self.assertEqual(pymal.READ('false'), MalBoolean(False))
 
     def test_read_numbers(self):
         self.assertEqual(pymal.READ('1'), 1)
