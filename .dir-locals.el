@@ -2,4 +2,5 @@
 ;;; For more information see (info "(emacs) Directory Variables")
 
 ((python-mode
-  (pyvenv-activate . "~/src/mal/python3")))
+  (pyvenv-activate . "~/src/pymal")
+  (elpy-test-runner . elpy-test-nose-runner)))
