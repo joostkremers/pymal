@@ -2,15 +2,15 @@ from mal_types import *
 
 
 def pr_str(obj, print_readably=False):
-    if type(obj) is list:
+    if type(obj) is MalList:
         str_list = [pr_str(s, print_readably) for s in obj]
         return '(' + ' '.join(str_list) + ')'
 
     elif type(obj) is MalVector:
-        str_list = [pr_str(s, print_readably) for s in obj.value]
+        str_list = [pr_str(s, print_readably) for s in obj]
         return '[' + ' '.join(str_list) + ']'
 
-    elif type(obj) is dict:
+    elif type(obj) is MalHash:
         str_list = []
         for key, value in obj.items():
             str_list += [pr_str(key, print_readably),
@@ -27,8 +27,7 @@ def pr_str(obj, print_readably=False):
         return string
 
     elif isinstance(obj, MalError):
-        return (pr_str(obj.error, print_readably) + ": " +
-                pr_str(obj.descr, print_readably))
+        return pr_str(obj.descr, print_readably)
 
     # If none of the above:
     else:

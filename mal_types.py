@@ -1,88 +1,78 @@
-class MalType:
-    """Parent type of all Mal-specific types."""
-
-    # This makes it easier to define certain properties that apply to all or
-    # most types, such as equality.
-
-    # We can use MalType when we need to have an object that has no effect
-    # whatsoever. VALUE in this case can indicate why this object exists. We do
-    # this with comments, for example.
-    def __init__(self, object):
-        self.value = object
-
-    def __str__(self):
-        return ""
-
-    def __eq__(self, other):
-        if type(self) != type(other):
-            return False
-        return (self.value == other.value)
-
-
-class MalNil(MalType):
+class MalNil():
     """Mal nil type."""
 
     def __init__(self):
         self.value = None
 
-    def __str__(self):
+    def __repr__(self):
         return "nil"
 
 
-class MalVector(MalType):
-    """Mal vector type."""
-
-    def __init__(self, value=None):
-        if value is None:
-            self.value = []
-        else:
-            self.value = value
-
-    def __str__(self):
-        items = [str(s) for s in self.value]
-        return '[' + ' '.join(items) + ']'
-
-    def __eq__(self, other):
-        if type(self) is MalVector:
-            val1 = self.value
-        else:
-            val1 = self
-        if type(other) is MalVector:
-            val2 = other.value
-        else:
-            val2 = other
-
-        return val1 == val2
-
-    def __len__(self):
-        return len(self.value)
-
-    def __contains__(self, x):
-        return x in self.value
-
-    def __getitem__(self, x):
-        return self.value[x]
+# There is only one nil value
+MAL_NIL = MalNil()
 
 
-class MalSymbol(MalType):
-    """Mal symbol type."""
+class MalList(list):
+    """Mal list type."""
 
-    def __init__(self, name):
-        self.name = name
-
-    def __str__(self):
-        return self.name
+    def __init__(self, value=[], meta=None):
+        super(MalList, self).__init__(value)
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
 
     def __repr__(self):
-        return "<Mal Symbol object '{}'>".format(self.name)
+        items = [s.__repr__() for s in self]
+        return '(' + ' '.join(items) + ')'
 
-    def __eq__(self, other):
-        if type(self) != type(other):
-            return False
-        return (self.name == other.name)
+    def __str__(self):
+        items = [str(s) for s in self]
+        return '(' + ' '.join(items) + ')'
 
 
-class MalError(MalType):
+class MalVector(list):
+    """Mal vector type."""
+
+    def __init__(self, value=None, meta=None):
+        super(MalVector, self).__init__(value)
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
+
+    def __repr__(self):
+        items = [s.__repr__() for s in self]
+        return '[' + ' '.join(items) + ']'
+
+    def __str__(self):
+        items = [str(s) for s in self]
+        return '[' + ' '.join(items) + ']'
+
+
+class MalHash(dict):
+    """Mal hash table type."""
+
+    def __init__(self, value=None, meta=None):
+        if value is None:
+            value = {}
+        super(MalHash, self).__init__(value)
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
+
+    def __repr__(self):
+        str_list = []
+        for key, value in self.items():
+            str_list += [key.__repr__(), value.__repr__()]
+        return '{' + ' '.join(str_list) + '}'
+
+    def __str__(self):
+        str_list = []
+        for key, value in self.items():
+            str_list += [str(key), str(value)]
+        return '{' + ' '.join(str_list) + '}'
+
+
+class MalError():
     """Mal error type.
 
     Errors are returned as normal values, but they halt evaluation and are
@@ -93,8 +83,8 @@ class MalError(MalType):
         self.error = error_type
         self.descr = descr
 
-    def __str__(self):
-        return self.error + ": " + self.descr
+    def __repr__(self):
+        return self.descr
 
     def __eq__(self, other):
         if type(self) != type(other):
@@ -115,10 +105,49 @@ class MalHandledError(MalError):
         self.descr = error_object.descr
 
 
-class MalKeyword(MalType):
+# class MalString():
+#     """Mal string type."""
+
+#     def __init__(self, value="", meta=None):
+#         self.value = value
+#         if meta is None:
+#             meta = MAL_NIL
+#         self.meta = meta
+
+#     def __repr__(self):
+#         string = self.value
+#         string = string.replace('\\', r'\\')
+#         string = string.replace('\n', r'\n')
+#         string = string.replace('"', r'\"')
+#         string = '"' + string + '"'
+#         return string
+
+#     def __str__(self):
+#         return self.value
+
+
+class MalSymbol():
+    """Mal symbol type."""
+
+    def __init__(self, name, meta=None):
+        self.name = name
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
+
+    def __repr__(self):
+        return self.name
+
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+        return (self.name == other.name)
+
+
+class MalKeyword():
     """Mal keyword type. """
 
-    def __init__(self, name):
+    def __init__(self, name, meta=None):
         """Create a keyword.
 
         Keywords are strings that start with a colon. If NAME does not start
@@ -127,6 +156,9 @@ class MalKeyword(MalType):
         if name[0] != ":":
             name = ':' + name
         self.name = name
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
 
     def __eq__(self, other):
         if type(self) != type(other):
@@ -136,21 +168,27 @@ class MalKeyword(MalType):
     def __hash__(self):
         return hash(self.name)
 
+    def __repr__(self):
+        return self.name
+
     def __str__(self):
         return self.name
 
 
-class MalBuiltin(MalType):
+class MalBuiltin():
     """Mal builtin function type."""
 
-    def __init__(self, fn=None):
+    def __init__(self, fn=None, meta=None):
         self.fn = fn
+        if meta is None:
+            meta = MAL_NIL
+        self.meta = meta
 
-    def __str__(self):
+    def __repr__(self):
         return "#<Builtin function at {}>".format(hex(id(self)))
 
 
-class MalFunction(MalType):
+class MalFunction():
     """Mal function type."""
 
     def __init__(self, fn=None, params=None, ast=None, env=None,
@@ -161,25 +199,24 @@ class MalFunction(MalType):
         self.env = env
         self.is_macro = is_macro
         if meta is None:
-            self.meta = MalNil()
-        else:
-            self.meta = meta
+            meta = MAL_NIL
+        self.meta = meta
 
-    def __str__(self):
+    def __repr__(self):
         if self.is_macro:
             fn_type = "macro"
         else:
-            fn_type = "funcion"
+            fn_type = "function"
         return "#<User {} at {}>".format(fn_type, hex(id(self)))
 
 
-class MalBoolean(MalType):
+class MalBoolean():
     """Mal boolean type."""
 
     def __init__(self, value=False):
         # We check for False with 'is', because in Python, 0 is equal to, but
         # not identical with, False, while in Mal, 0 counts as true.
-        if value in [[], "", MalVector([]), MalNil(), {}] or value is False:
+        if value in [[], "", MalVector([]), MAL_NIL, {}] or value is False:
             self.value = False
         else:
             self.value = True
@@ -189,24 +226,26 @@ class MalBoolean(MalType):
             return False
         return (self.value is other.value)
 
-    def __str__(self):
+    def __repr__(self):
         if self.value is True:
             return "true"
         if self.value is False:
             return "false"
 
 
-class MalAtom(MalType):
+class MalAtom():
     """Mal atom type."""
 
     def __init__(self, value=None):
         if value is None:
-            self.value = MalNil()
-        else:
-            self.value = value
+            value = MAL_NIL
+        self.value = value
 
     def set(self, value):
         self.value = value
 
+    def __repr__(self):
+        return ('(atom ' + self.value.__repr__() + ')')
+
     def __str__(self):
-        return '(atom {})'.format(self.value)
+        return ('(atom ' + self.value.__str__() + ')')

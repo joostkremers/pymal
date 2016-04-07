@@ -22,7 +22,7 @@ def EVAL(ast, env):
     while True:
         if type(ast) is MalError:
             return ast
-        elif type(ast) is not list:
+        elif type(ast) is not MalList:
             return eval_ast(ast, env)
         else:  # if ast is a list
             if len(ast) == 0:  # if ast is the empty list, just return it
@@ -30,7 +30,7 @@ def EVAL(ast, env):
 
             # perform macro expansion
             ast = macroexpand(ast, env)
-            if type(ast) is not list:
+            if type(ast) is not MalList:
                 return eval_ast(ast, env)
 
             # apply
@@ -129,15 +129,12 @@ def mal_defmacro(environment, ast):
 
 
 def mal_let(environment, bindings, body):
-    if not isinstance(bindings, (list, MalVector)):
+    if not isinstance(bindings, (MalList, MalVector)):
         return (MalError("LetError", "Invalid bind form"), None)
     if (len(bindings) % 2 != 0):
         return (MalError("LetError", "Insufficient bind forms"), None)
 
     new_env = menv.MalEnv(outer=environment)
-    # Note: bindings may be a list or an MalVector.
-    if type(bindings) is MalVector:
-        bindings = bindings.value
     for i in range(0, len(bindings), 2):
         if type(bindings[i]) is not MalSymbol:
             return (MalError("LetError", "Attempt to bind to non-symbol"),
@@ -159,19 +156,18 @@ def mal_if(environment, args):
                         "received {}".format(len(args)))
 
     condition = EVAL(args[0], environment)
-    if not (condition == MalNil() or condition == MalBoolean(False)):
+    if type(condition) is MalError:
+        return condition
+    if not (condition == MAL_NIL or condition == MalBoolean(False)):
         return args[1]
     else:
         if len(args) == 3:
             return args[2]
         else:
-            return MalNil()
+            return MAL_NIL
 
 
 def mal_fn(environment, syms, body):
-    if type(syms) is MalVector:
-        syms = syms.value
-
     if '&' in syms:
         if syms.index('&') != len(syms) - 2:
             return MalError("BindsError", "Illegal binds list")
@@ -186,7 +182,7 @@ def mal_fn(environment, syms, body):
 def is_pair(arg):
     """Return True if ARG is a non-empty list or vector."""
 
-    if isinstance(arg, (list, MalVector)) and len(arg) > 0:
+    if isinstance(arg, list) and len(arg) > 0:
         return True
     else:
         return False
@@ -195,7 +191,7 @@ def is_pair(arg):
 def mal_quasiquote(ast):
     # not a list (or empty list)
     if not is_pair(ast):
-        return list((MalSymbol("quote"), ast))
+        return MalList((MalSymbol("quote"), ast))
 
     # unquote
     elif type(ast[0]) is MalSymbol and ast[0].name == "unquote":
@@ -207,19 +203,19 @@ def mal_quasiquote(ast):
           ast[0][0].name == "splice-unquote"):
         first = MalSymbol("concat")
         second = ast[0][1]
-        rest = mal_quasiquote(ast[1:])
-        return list((first, second, rest))
+        rest = mal_quasiquote(MalList(ast[1:]))
+        return MalList((first, second, rest))
 
     # otherwise
     else:
         first = MalSymbol("cons")
         second = mal_quasiquote(ast[0])
-        rest = mal_quasiquote(ast[1:])
-        return list((first, second, rest))
+        rest = mal_quasiquote(MalList(ast[1:]))
+        return MalList((first, second, rest))
 
 
 def is_macro_call(ast, env):
-    if type(ast) is not list:
+    if type(ast) is not MalList:
         return False
     if type(ast[0]) is not MalSymbol:
         return False
@@ -246,20 +242,20 @@ def eval_ast(ast, env):
     if type(ast) is MalSymbol:
         return env.get(ast.name)
 
-    elif type(ast) is list:
-        return eval_list(ast, env)
+    elif type(ast) is MalList:
+        return MalList(eval_list(ast, env))
 
     elif type(ast) is MalVector:
-        return MalVector(eval_list(ast.value, env))
+        return MalVector(eval_list(ast, env))
 
-    elif type(ast) is dict:
+    elif type(ast) is MalHash:
         res = {}
         for key, val in ast.items():
             newval = EVAL(val, env)
             if type(newval) is MalError:
                 return newval
             res[key] = newval
-        return res
+        return MalHash(res)
 
     else:
         return ast
@@ -327,7 +323,8 @@ def Mal(args=[]):
     rep("(def! *gensym-counter* (atom 0))", repl_env)
     rep("(def! gensym (fn* []"
         "  (symbol (str \"G__\""
-        "    (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))", repl_env)
+        "               (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))",
+        repl_env)
 
     # Add 'cond' and 'or'
     rep("(defmacro! cond (fn* (& xs)"

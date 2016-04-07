@@ -26,7 +26,7 @@ class MalEnv():
 
             if sym == '&':
                 sym = binds[i+1]
-                val = list(exprs)[i:]
+                val = MalList(list(exprs)[i:])
                 self.set(sym, val)
                 break
 
@@ -34,7 +34,7 @@ class MalEnv():
                 if i < len(exprs):
                     val = exprs[i]
                 else:
-                    val = MalNil()
+                    val = MAL_NIL
 
             self.set(sym, val)
 

@@ -105,7 +105,7 @@ def read_sequence(form, token):
     form.next()
 
     if end_token == ')':
-        return res
+        return MalList(res)
     elif end_token == '}':
         return create_hash(res)
     else:
@@ -130,7 +130,7 @@ def create_hash(items):
                             "Cannot hash on {}".format(type(key)))
         value = items[i+1]
         res[key] = value
-    return res
+    return MalHash(res)
 
 
 def apply_with_meta_macro(form):
@@ -140,7 +140,7 @@ def apply_with_meta_macro(form):
     obj = read_form(form)
     if type(obj) is MalError:
         return obj
-    return [MalSymbol('with-meta'), obj, data]
+    return MalList([MalSymbol('with-meta'), obj, data])
 
 
 def apply_reader_macro(form, token):
@@ -148,7 +148,7 @@ def apply_reader_macro(form, token):
     if type(next_form) is MalError:
         return next_form
     replacement = MalSymbol(reader_macros[token])
-    return [replacement, next_form]
+    return MalList([replacement, next_form])
 
 
 def read_atom(token):
@@ -176,7 +176,7 @@ def read_atom(token):
 
     # nil
     if token == "nil":
-        return MalNil()
+        return MAL_NIL
 
     # symbols
     if re.match(r"[^\s\[\]{}('\"`,;)]*", token):

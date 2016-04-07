@@ -146,27 +146,17 @@ def mal_greater_or_equal(*args):
 
 # list / vector functions
 def mal_cons(obj, lst):
-    if type(lst) is MalVector:
-        lst = lst.value
-    if type(lst) is not list:
+    if not isinstance(lst, list):
         return MalError("ArgError", "'cons': Wrong type argument: "
                         "expected list or vector, got {}".format(type(lst)))
-    return [obj] + lst
+    return MalList([obj] + lst)
 
 
 def mal_concat(*args):
     res = []
     for arg in args:
-        if type(arg) is MalVector:
-            res.extend(arg.value)
-        elif type(arg) is list:
-            res.extend(arg)
-        else:
-            return MalError("ArgError", "'concat': Wrong type argument: "
-                            "expected list or vector, got {}".
-                            format(type(arg)))
-
-    return res
+        res.extend(arg)
+    return MalList(res)
 
 
 def mal_conj(seq, *elems):
@@ -176,20 +166,20 @@ def mal_conj(seq, *elems):
     in reverse order. If SEQ is a vector, the elements are added to the end.
 
     """
-    if not isinstance(seq, (list, MalVector)):
+    if not isinstance(seq, (MalList, MalVector)):
         return MalError("ArgError", "'conj': Wrong type argument:"
                         "expected list or vector, received {}".
                         format(type(seq)))
 
-    if type(seq) is list:
-        return list(elems)[::-1] + seq
+    if type(seq) is MalList:
+        return MalList(list(elems[::-1]) + seq)
 
     if type(seq) is MalVector:
-        return MalVector(seq.value + list(elems))
+        return MalVector(seq[:] + MalVector(elems))
 
 
 def mal_nth(arg, index):
-    if not isinstance(arg, (list, MalVector)):
+    if not isinstance(arg, (MalList, MalVector)):
         return MalError("ArgError", "'nth': Wrong type argument:"
                         "expected list or vector, received {}".
                         format(type(arg)))
@@ -200,48 +190,46 @@ def mal_nth(arg, index):
 
 
 def mal_first(arg):
-    if not isinstance(arg, (list, MalVector, MalNil)):
+    if not isinstance(arg, (MalList, MalVector, MalNil)):
         return MalError("ArgError", "'nth': Wrong type argument:"
                         "expected list or vector, received {}".
                         format(type(arg)))
 
-    if type(arg) is MalNil or len(arg) == 0:
-        return MalNil()
+    if arg == MAL_NIL or len(arg) == 0:
+        return MAL_NIL
 
     return arg[0]
 
 
 def mal_rest(arg):
-    if not isinstance(arg, (list, MalVector, MalNil)):
+    if arg == MAL_NIL:
+        return []
+    elif type(arg) is MalList:
+        return MalList(arg[1:])
+    elif type(arg) is MalVector:
+        return MalVector(arg[1:])
+    else:
         return MalError("ArgError", "'nth': Wrong type argument:"
                         "expected list or vector, received {}".
                         format(type(arg)))
 
-    if type(arg) is MalNil:
-        return []
-
-    return arg[1:]
-
 
 def mal_list(*args):
-    return list(args)
+    return MalList(args)
 
 
 def mal_listp(arg):
-    if type(arg) is list:
+    if type(arg) is MalList:
         return MalBoolean(True)
     else:
         return MalBoolean(False)
 
 
 def mal_emptyp(arg):
-    if type(arg) is MalVector:
-        arg = arg.value
-    if type(arg) is not list:
+    if not isinstance(arg, (MalList, MalVector)):
         return MalError("ArgError",
                         "'empty?': Wrong type argument: "
                         "expected list or vector, got {}".format(type(arg)))
-
     if arg == []:
         return MalBoolean(True)
     else:
@@ -249,15 +237,12 @@ def mal_emptyp(arg):
 
 
 def mal_count(arg):
-    if type(arg) is MalNil:
+    if arg == MAL_NIL:
         return 0
-    if type(arg) is MalVector:
-        arg = arg.value
-    if type(arg) is not list:
+    if not isinstance(arg, (MalList, MalVector)):
         return MalError("ArgError",
                         "'count': Wrong type argument: "
                         "expected list or vector, got {}".format(type(arg)))
-
     return len(arg)
 
 
@@ -272,12 +257,12 @@ def mal_str(*args):
 
 def mal_prn(*args):
     print(" ".join([printer.pr_str(arg, True) for arg in args]))
-    return MalNil()
+    return MAL_NIL
 
 
 def mal_println(*args):
     print(" ".join([printer.pr_str(arg, False) for arg in args]))
-    return MalNil()
+    return MAL_NIL
 
 
 # file functions
@@ -295,7 +280,7 @@ def mal_readline(prompt):
     try:
         line = input(prompt)
     except EOFError:
-        return MalNil()
+        return MAL_NIL
     return line
 
 
@@ -340,10 +325,7 @@ def mal_apply(fn, *args):
                         " received {}".format(fn))
 
     lastarg = args[-1]
-    if type(lastarg) is MalVector:
-        lastarg = lastarg.value
-
-    if not isinstance(lastarg, list):
+    if not isinstance(lastarg, (MalList, MalVector)):
         return MalError("TypeError", "'apply': Expected list or vector,"
                         " received {}".format(args[-1]))
 
@@ -357,9 +339,7 @@ def mal_map(fn, lst):
         return MalError("TypeError", "'map': Expected function,"
                         " received {}".format(fn))
 
-    if type(lst) is MalVector:
-        lst = lst.value
-    if type(lst) is not list:
+    if not isinstance(lst, (MalList, MalVector)):
         return MalError("TypeError", "Expected list or vector,"
                         " received {}".format(lst))
 
@@ -404,20 +384,20 @@ def mal_seq(arg):
     it to a list; if ARG is a non-empty string, return a list of characters.
 
     """
-    if type(arg) is MalNil:
-        return MalNil()
+    if arg == MAL_NIL:
+        return arg
 
     if len(arg) == 0:
-        return MalNil()
+        return MAL_NIL
 
-    if type(arg) is list:
+    if type(arg) is MalList:
         return arg
 
     if type(arg) is MalVector:
-        return arg.value
+        return MalList(arg)
 
     if type(arg) is str:
-        return list(arg)
+        return MalList(arg)
 
     # if all fails, return an error
     return MalError("ArgError", "'seq': Wrong type argument: "
@@ -426,7 +406,7 @@ def mal_seq(arg):
 
 # type predicates
 def mal_nilp(arg):
-    if arg == MalNil():
+    if arg == MAL_NIL:
         return MalBoolean(True)
     else:
         return MalBoolean(False)
@@ -468,14 +448,14 @@ def mal_vectorp(arg):
 
 
 def mal_mapp(arg):
-    if type(arg) is dict:
+    if type(arg) is MalHash:
         return MalBoolean(True)
     else:
         return MalBoolean(False)
 
 
 def mal_sequentialp(arg):
-    if isinstance(arg, (list, MalVector)):
+    if isinstance(arg, (MalList, MalVector)):
         return MalBoolean(True)
     else:
         return MalBoolean(False)
@@ -494,7 +474,7 @@ def mal_hashmap(*args):
 
 
 def mal_assoc(hashmap, *args):
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
@@ -505,11 +485,11 @@ def mal_assoc(hashmap, *args):
         return new
 
     orig.update(new)
-    return orig
+    return MalHash(orig)
 
 
 def mal_dissoc(hashmap, *keys):
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
@@ -522,20 +502,20 @@ def mal_dissoc(hashmap, *keys):
 
 
 def mal_get(hashmap, key):
-    if hashmap == MalNil():
+    if hashmap == MAL_NIL:
         hashmap = {}
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
     if key in hashmap:
         return hashmap[key]
     else:
-        return MalNil()
+        return MAL_NIL
 
 
 def mal_containsp(hashmap, key):
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
@@ -546,7 +526,7 @@ def mal_containsp(hashmap, key):
 
 
 def mal_keys(hashmap):
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
@@ -554,7 +534,7 @@ def mal_keys(hashmap):
 
 
 def mal_vals(hashmap):
-    if type(hashmap) is not dict:
+    if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
@@ -566,7 +546,7 @@ def mal_meta(obj):
     try:
         data = obj.meta
     except AttributeError:
-        return MalNil()
+        return MAL_NIL
     return data
 
 
