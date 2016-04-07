@@ -26,9 +26,6 @@ def pr_str(obj, print_readably=False):
             string = '"' + string + '"'
         return string
 
-    elif isinstance(obj, MalError):
-        return pr_str(obj.descr, print_readably)
-
     # If none of the above:
     else:
         return str(obj)
