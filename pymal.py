@@ -245,10 +245,22 @@ def eval_ast(ast, env):
         return env.get(ast.name)
 
     elif type(ast) is MalList:
-        return MalList(eval_list(ast, env))
+        res = []
+        for elem in ast:
+            val = EVAL(elem, env)
+            if type(val) is MalError:
+                return val
+            res.append(val)
+        return MalList(res)
 
     elif type(ast) is MalVector:
-        return MalVector(eval_list(ast, env))
+        res = []
+        for elem in ast:
+            val = EVAL(elem, env)
+            if type(val) is MalError:
+                return val
+            res.append(val)
+        return MalVector(res)
 
     elif type(ast) is MalHash:
         res = {}
@@ -261,16 +273,6 @@ def eval_ast(ast, env):
 
     else:
         return ast
-
-
-def eval_list(ast, env):
-    res = []
-    for elem in ast:
-        val = EVAL(elem, env)
-        if type(val) is MalError:
-            return val
-        res.append(val)
-    return res
 
 
 # These builtins are defined here and not in core.py because they call EVAL:
