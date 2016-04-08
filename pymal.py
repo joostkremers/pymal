@@ -65,7 +65,7 @@ def EVAL(ast, env):
                     ast, env = mal_let(env, ast[1], ast[2])
                     continue
                 elif symbol == "do":
-                    evalled = eval_ast(ast[1:-1], env)
+                    evalled = eval_ast(MalList(ast[1:-1]), env)
                     if type(evalled) is MalError:
                         return evalled
                     ast = ast[-1]
