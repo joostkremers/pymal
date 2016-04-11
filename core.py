@@ -468,6 +468,10 @@ def mal_stringp(arg):
         return MalBoolean(False)
 
 
+def mal_typeof(arg):
+    return type(arg)
+
+
 # hash functions
 def mal_hashmap(*args):
     return reader.create_hash(args)
@@ -627,6 +631,7 @@ ns = {'+':           MalBuiltin(mal_add),
       'map?':        MalBuiltin(mal_mapp),
       'sequential?': MalBuiltin(mal_sequentialp),
       'string?':     MalBuiltin(mal_stringp),
+      'typeof':      MalBuiltin(mal_typeof),
 
       'hash-map':    MalBuiltin(mal_hashmap),
       'assoc':       MalBuiltin(mal_assoc),
