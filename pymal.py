@@ -311,7 +311,7 @@ def Mal(args=[]):
     repl_env.set("swap!", MalBuiltin(mal_swap))
 
     # Add the command line arguments to repl_env:
-    repl_env.set("*ARGV*", list(args[1:]))
+    repl_env.set("*ARGV*", MalList(args[1:]))
 
     # Add *host-language*:
     repl_env.set("*host-language*", "Python3")
