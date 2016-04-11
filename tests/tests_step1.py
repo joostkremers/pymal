@@ -2,9 +2,10 @@ import unittest
 
 import pymal
 from mal_types import *
+from eval_assert import EvalAssert
 
 
-class TestStep1(unittest.TestCase):
+class TestStep1(unittest.TestCase, EvalAssert):
     def test_read_nil_true_false(self):
         self.assertEqual(pymal.READ('nil'), MAL_NIL)
         self.assertEqual(pymal.READ('true'), MalBoolean(True))
@@ -33,13 +34,12 @@ class TestStep1(unittest.TestCase):
 
     # Also test that strings are printed back correctly:
     def test_read_print_strings(self):
-        self.assertEqual(pymal.rep('"abc"', {}), '"abc"')
-        self.assertEqual(pymal.rep('   "abc"', {}), '"abc"')
-        self.assertEqual(pymal.rep('"abc (with parens)"', {}),
-                         '"abc (with parens)"')
-        self.assertEqual(pymal.rep(r'"abc\"def"', {}), r'"abc\"def"')
-        self.assertEqual(pymal.rep(r'"abc\ndef"', {}), r'"abc\ndef"')
-        self.assertEqual(pymal.rep('""', {}), '""')
+        self.assertEval('"abc"', {}, '"abc"')
+        self.assertEval('   "abc"', {}, '"abc"')
+        self.assertEval('"abc (with parens)"', {}, '"abc (with parens)"')
+        self.assertEval(r'"abc\"def"', {}, r'"abc\"def"')
+        self.assertEval(r'"abc\ndef"', {}, r'"abc\ndef"')
+        self.assertEval('""', {}, '""')
 
     # Note: we can test the result of READ against a list, not a MalList, since
     # both types test equal.
