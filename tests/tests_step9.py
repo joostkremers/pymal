@@ -10,7 +10,7 @@ import mal_env as menv
 from eval_assert import EvalAssert
 
 
-class TestStep8(unittest.TestCase, EvalAssert):
+class TestStep9(unittest.TestCase, EvalAssert):
     def setUp(self):
         self.env = menv.MalEnv()
         for sym in core.ns:
