@@ -118,7 +118,7 @@ class TestStep8(unittest.TestCase, EvalAssert):
         self.assertEval('(-> (list 7 8 9) rest (rest) first (+ 7))',
                         self.env, '16')
 
-    def test_thread_last_macro(self):
+    def test_thread_last_macro(self):  # 68
         self.assertEval('(->> "L")', self.env, '"L"')
         self.assertEval('(->> "L" (str "A") (str "M"))', self.env, '"MAL"')
         self.assertEval('(->> [4]'
