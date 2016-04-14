@@ -500,7 +500,7 @@ def mal_dissoc(hashmap, *keys):
     for key in keys:
         new.pop(key, None)
 
-    return new
+    return MalHash(new)
 
 
 def mal_get(hashmap, key):
