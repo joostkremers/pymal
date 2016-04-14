@@ -313,7 +313,7 @@ def mal_reset(atom, value):
 
 # throw
 def mal_throw(arg):
-    return MalError("UserError", arg)
+    return MalError("UserError", str(arg))
 
 
 # functional functions
