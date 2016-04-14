@@ -13,7 +13,7 @@ class TestStep2(unittest.TestCase, EvalAssert):
         for sym in core.ns:
             self.env.set(sym, core.ns[sym])
 
-    def test_eval(self):
+    def test_eval(self):  # 15
         self.assertEval('(+ 1 2)', self.env, '3')
         self.assertEval('(+ 5 (* 2 3))', self.env, '11')
         self.assertEval('(- (+ 5 (* 2 3)) 3)', self.env, '8')
@@ -25,6 +25,6 @@ class TestStep2(unittest.TestCase, EvalAssert):
         self.assertEval('{"a" (+ 7 8)}', self.env, '{"a" 15}')
         self.assertEval('{:a (+ 7 8)}', self.env, '{:a 15}')
 
-    def test_eval_error(self):
+    def test_eval_error(self):  # 16
         ast = pymal.READ('(abc 1 2 3)')
         self.assertIs(type(pymal.EVAL(ast, self.env)), MalError)

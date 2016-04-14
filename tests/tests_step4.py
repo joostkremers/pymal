@@ -15,7 +15,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         for sym in core.ns:
             self.env.set(sym, core.ns[sym])
 
-    def test_list_functions(self):
+    def test_list_functions(self):  # 22
         self.assertEval('(list)', self.env, '()')
         self.assertEval('(list? (list))', self.env, 'true')
         self.assertEval('(empty? (list))', self.env, 'true')
@@ -29,7 +29,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(if (>= (count (list 1 2 3)) 3)' ' "yes" "no")',
                         self.env, '"yes"')
 
-    def test_if_form(self):
+    def test_if_form(self):  # 23
         self.assertEval('(if true 7 8)', self.env, '7')
         self.assertEval('(if false 7 8)', self.env, '8')
         self.assertEval('(if true (+ 1 7) (+ 1 8))', self.env, '8')
@@ -40,12 +40,12 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(if (list 1 2 3) 7 8)', self.env, '7')
         self.assertEval('(= (list) nil)', self.env, 'false')
 
-    def test_if_form_one_way(self):
+    def test_if_form_one_way(self):  # 24
         self.assertEval('(if false (+ 1 7))', self.env, 'nil')
         self.assertEval('(if nil 8 7)', self.env, '7')
         self.assertEval('(if true (+ 1 7))', self.env, '8')
 
-    def test_basic_conditionals(self):
+    def test_basic_conditionals(self):  # 25
         self.assertEval('(= 2 1)', self.env, 'false')
         self.assertEval('(= 1 1)', self.env, 'true')
         self.assertEval('(= 1 2)', self.env, 'false')
@@ -66,7 +66,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(<= 1 1)', self.env, 'true')
         self.assertEval('(<= 1 2)', self.env, 'true')
 
-    def test_equality(self):
+    def test_equality(self):  # 26
         self.assertEval('(= 1 1)', self.env, 'true')
         self.assertEval('(= 0 0)', self.env, 'true')
         self.assertEval('(= 1 0)', self.env, 'false')
@@ -83,21 +83,21 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(= (list) "")', self.env, 'false')
         self.assertEval('(= "" (list))', self.env, 'false')
 
-    def test_builtin_and_user_functions(self):
+    def test_builtin_and_user_functions(self):  # 27
         self.assertEval('(+ 1 2)', self.env, '3')
         self.assertEval('( (fn* (a b) (+ a b)) 3 4)', self.env, '7')
         self.assertEval('( (fn* () 4) )', self.env, '4')
         self.assertEval('( (fn* (f x) (f x)) (fn* (a) (+ 1 a)) 7)',
                         self.env, '8')
 
-    def test_closures(self):
+    def test_closures(self):  # 28
         self.assertEval('( ( (fn* (a) (fn* (b) (+ a b))) 5) 7)',
                         self.env, '12')
         pymal.rep('(def! gen-plus5 (fn* () (fn* (b) (+ 5 b))))', self.env)
         pymal.rep('(def! plus5 (gen-plus5))', self.env)
         self.assertEval('(plus5 7)', self.env, '12')
 
-    def test_variable_length_arguments(self):
+    def test_variable_length_arguments(self):  # 29
         self.assertEval('( (fn* (& more) (count more)) 1 2 3)', self.env, '3')
         self.assertEval('( (fn* (& more) (list? more)) 1 2 3)',
                         self.env, 'true')
@@ -109,7 +109,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('( (fn* (a & more) (count more)) 1)', self.env, '0')
         self.assertEval('( (fn* (a & more) (list? more)) 1)', self.env, 'true')
 
-    def test_not(self):
+    def test_not(self):  # 30
         pymal.rep("(def! not (fn* (a) (if a false true)))", self.env)
 
         self.assertEval('(not false)', self.env, 'true')
@@ -117,7 +117,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(not "a")', self.env, 'false')
         self.assertEval('(not 0)', self.env, 'false')
 
-    def test_do(self):
+    def test_do(self):  # 31
         f = StringIO()
         with redirect_stdout(f):
             res = pymal.rep('(do (prn "prn output1"))', self.env)
@@ -142,7 +142,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(do (def! a 6) 7 (+ a 8))', self.env, '14')
         self.assertEval('a', self.env, '6')
 
-    def test_recursive_sumdown(self):
+    def test_recursive_sumdown(self):  # 32
         pymal.rep('(def! sumdown (fn* (N)'
                   '  (if (> N 0)'
                   '      (+ N (sumdown (- N 1)))'
@@ -151,7 +151,7 @@ class TestStep4(unittest.TestCase, EvalAssert):
         self.assertEval('(sumdown 2)', self.env, '3')
         self.assertEval('(sumdown 6)', self.env, '21')
 
-    def test_recursive_fibonacci(self):
+    def test_recursive_fibonacci(self):  # 33
         pymal.rep('(def! fib (fn* (N)'
                   '  (if (= N 0)'
                   '      1'

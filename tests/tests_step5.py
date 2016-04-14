@@ -13,7 +13,7 @@ class TestStep5(unittest.TestCase, EvalAssert):
         for sym in core.ns:
             self.env.set(sym, core.ns[sym])
 
-    def test_tco(self):
+    def test_tco(self):  # 34
         pymal.rep('(def! sum2 (fn* (n acc)'
                   '  (if (= n 0)'
                   '    acc'
@@ -23,7 +23,7 @@ class TestStep5(unittest.TestCase, EvalAssert):
         pymal.rep('(def! res2 (sum2 10000 0))', self.env)
         self.assertEval('res2', self.env, '50005000')
 
-    def test_multiple_recursive_tco(self):
+    def test_multiple_recursive_tco(self):  # 35
         pymal.rep('(def! foo (fn* (n)'
                   '  (if (= n 0)'
                   '    0'
@@ -34,10 +34,10 @@ class TestStep5(unittest.TestCase, EvalAssert):
                   '    (foo (- n 1)))))', self.env)
         self.assertEval('(foo 10000)', self.env, '0')
 
-    def test_do_under_tco(self):
+    def test_do_under_tco(self):  # 36
         self.assertEval('(do (do 1 2))', self.env, '2')
 
-    def test_vector_params(self):
+    def test_vector_params(self):  # 37
         pymal.rep('(def! g (fn* [] 78))', self.env)
         self.assertEval('(g)', self.env, '78')
         pymal.rep('(def! g (fn* [a] (+ a 78)))', self.env)
