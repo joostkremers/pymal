@@ -348,7 +348,7 @@ def mal_map(fn, lst):
             return evalled
         res.append(evalled)
 
-    return res
+    return MalList(res)
 
 
 # type functions
