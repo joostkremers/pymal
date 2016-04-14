@@ -203,11 +203,9 @@ def mal_first(arg):
 
 def mal_rest(arg):
     if arg == MAL_NIL:
-        return []
-    elif type(arg) is MalList:
+        return MalList([])
+    elif isinstance(arg, (MalList, MalVector)):
         return MalList(arg[1:])
-    elif type(arg) is MalVector:
-        return MalVector(arg[1:])
     else:
         return MalError("ArgError", "'nth': Wrong type argument:"
                         "expected list or vector, received {}".
