@@ -505,7 +505,7 @@ def mal_dissoc(hashmap, *keys):
 
 def mal_get(hashmap, key):
     if hashmap == MAL_NIL:
-        hashmap = {}
+        hashmap = MalHash({})
     if type(hashmap) is not MalHash:
         return MalError("TypeError",
                         "Wrong type argument: "
