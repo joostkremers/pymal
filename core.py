@@ -532,7 +532,7 @@ def mal_keys(hashmap):
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
-    return list(hashmap.keys())
+    return MalList(hashmap.keys())
 
 
 def mal_vals(hashmap):
@@ -540,7 +540,7 @@ def mal_vals(hashmap):
         return MalError("TypeError",
                         "Wrong type argument: "
                         "expected hash, received {}".format(type(hashmap)))
-    return list(hashmap.values())
+    return MalList(hashmap.values())
 
 
 # metadata
