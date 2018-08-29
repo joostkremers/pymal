@@ -1,7 +1,7 @@
 import unittest
 
 import pymal
-from mal_types import *
+import mal_types as mal
 import core
 import mal_env as menv
 from eval_assert import EvalAssert
@@ -27,4 +27,4 @@ class TestStep2(unittest.TestCase, EvalAssert):
 
     def test_eval_error(self):  # 16
         ast = pymal.READ('(abc 1 2 3)')
-        self.assertIs(type(pymal.EVAL(ast, self.env)), MalError)
+        self.assertIs(type(pymal.EVAL(ast, self.env)), mal.Error)

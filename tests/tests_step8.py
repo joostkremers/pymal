@@ -1,7 +1,7 @@
 import unittest
 
 import pymal
-from mal_types import *
+import mal_types as mal
 import core
 import mal_env as menv
 from eval_assert import EvalAssert
@@ -14,8 +14,8 @@ class TestStep8(unittest.TestCase, EvalAssert):
             self.env.set(sym, core.ns[sym])
 
         # Add 'eval' and 'swap!' functions
-        self.env.set("eval", MalBuiltin(pymal.mal_eval))
-        self.env.set("swap!", MalBuiltin(pymal.mal_swap))
+        self.env.set("eval", mal.Builtin(pymal.mal_eval))
+        self.env.set("swap!", mal.Builtin(pymal.mal_swap))
         # set repl_env for 'eval'
         pymal.repl_env = self.env
 

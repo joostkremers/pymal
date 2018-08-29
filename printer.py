@@ -1,16 +1,16 @@
-from mal_types import *
+import mal_types as mal
 
 
 def pr_str(obj, print_readably=False):
-    if type(obj) is MalList:
+    if type(obj) is mal.List:
         str_list = [pr_str(s, print_readably) for s in obj]
         return '(' + ' '.join(str_list) + ')'
 
-    elif type(obj) is MalVector:
+    elif type(obj) is mal.Vector:
         str_list = [pr_str(s, print_readably) for s in obj]
         return '[' + ' '.join(str_list) + ']'
 
-    elif type(obj) is MalHash:
+    elif type(obj) is mal.Hash:
         str_list = []
         for key, value in obj.items():
             str_list += [pr_str(key, print_readably),

@@ -3,7 +3,7 @@ from contextlib import redirect_stdout
 import unittest
 
 import pymal
-from mal_types import *
+import mal_types as mal
 import core
 import mal_env as menv
 from eval_assert import EvalAssert
@@ -15,15 +15,15 @@ class TestStep6(unittest.TestCase, EvalAssert):
         for sym in core.ns:
             self.env.set(sym, core.ns[sym])
 
-        self.env.set("eval", MalBuiltin(pymal.mal_eval))
-        self.env.set("swap!", MalBuiltin(pymal.mal_swap))
+        self.env.set("eval", mal.Builtin(pymal.mal_eval))
+        self.env.set("swap!", mal.Builtin(pymal.mal_swap))
 
         pymal.rep('(def! load-file (fn* (f)'
                   '  (eval'
                   '    (read-string (str "(do " (slurp f) ")")))))',
                   self.env)
         # Set up a mock *ARGV*
-        self.env.set("*ARGV*", MalList([]))
+        self.env.set("*ARGV*", mal.List([]))
         # set repl_env for 'eval'
         pymal.repl_env = self.env
 

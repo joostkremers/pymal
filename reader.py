@@ -1,6 +1,6 @@
 # coding=utf-8
 import re
-from mal_types import *
+import mal_types as mal
 
 
 class Reader:
@@ -94,9 +94,9 @@ def read_sequence(form, token):
         if token == end_token:  # We've found the end of the list.
             break
         if token == '':  # We've reached the end of FORM.
-            return MalError("ParenError", "Missing closing parenthesis")
+            return mal.Error("ParenError", "Missing closing parenthesis")
         next_form = read_form(form)
-        if type(next_form) is MalError:
+        if type(next_form) is mal.Error:
             return next_form
 
         res.append(next_form)
@@ -105,50 +105,50 @@ def read_sequence(form, token):
     form.next()
 
     if end_token == ')':
-        return MalList(res)
+        return mal.List(res)
     elif end_token == '}':
         return create_hash(res)
     else:
-        return MalVector(res)
+        return mal.Vector(res)
 
 
 def create_hash(items):
     """Create a hash table from ITEMS."""
 
-    # Hash tables in Mal can have strings or keywords as keys. MalKeyword are
+    # Hash tables in Mal can have strings or keywords as keys. mal.Keyword are
     # hashable, so there's no need to use a rare Unicode character as prefix in
     # order to distinguish them from strings, as suggested in the mal_guide.
 
     if (len(items) % 2) != 0:
-        return MalError("HashError", "Insufficient number of items")
+        return mal.Error("HashError", "Insufficient number of items")
 
     res = {}
     for i in range(0, len(items), 2):
         key = items[i]
-        if not isinstance(key, (str, MalKeyword)):
-            return MalError("HashError",
-                            "Cannot hash on {}".format(type(key)))
-        value = items[i+1]
+        if not isinstance(key, (str, mal.Keyword)):
+            return mal.Error("HashError",
+                             "Cannot hash on {}".format(type(key)))
+        value = items[i + 1]
         res[key] = value
-    return MalHash(res)
+    return mal.Hash(res)
 
 
 def apply_with_meta_macro(form):
     data = read_form(form)
-    if type(data) is MalError:
+    if type(data) is mal.Error:
         return data
     obj = read_form(form)
-    if type(obj) is MalError:
+    if type(obj) is mal.Error:
         return obj
-    return MalList([MalSymbol('with-meta'), obj, data])
+    return mal.List([mal.Symbol('with-meta'), obj, data])
 
 
 def apply_reader_macro(form, token):
     next_form = read_form(form)
-    if type(next_form) is MalError:
+    if type(next_form) is mal.Error:
         return next_form
-    replacement = MalSymbol(reader_macros[token])
-    return MalList([replacement, next_form])
+    replacement = mal.Symbol(reader_macros[token])
+    return mal.List([replacement, next_form])
 
 
 def read_atom(token):
@@ -166,26 +166,26 @@ def read_atom(token):
 
     # keywords
     if re.match(r'\A:.*\Z', token):
-        return MalKeyword(token)
+        return mal.Keyword(token)
 
     # boolean
     if token == "true":
-        return MalBoolean(True)
+        return mal.Boolean(True)
     if token == "false":
-        return MalBoolean(False)
+        return mal.Boolean(False)
 
     # nil
     if token == "nil":
-        return MAL_NIL
+        return mal.NIL
 
     # symbols
     if re.match(r"[^\s\[\]{}('\"`,;)]*", token):
-        return MalSymbol(token)
+        return mal.Symbol(token)
 
     # Found nothing parsable. (Shouldn't really happen, since symbols are a
     # catch-all already.)
-    return MalError("ParseError", "Could not parse token: '{}'".
-                    format(token))
+    return mal.Error("ParseError", "Could not parse token: '{}'".
+                     format(token))
 
 
 def main():

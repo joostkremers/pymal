@@ -1,4 +1,4 @@
-class MalNil():
+class Nil():
     """Mal nil type."""
 
     def __init__(self):
@@ -9,16 +9,16 @@ class MalNil():
 
 
 # There is only one nil value
-MAL_NIL = MalNil()
+NIL = Nil()
 
 
-class MalList(list):
+class List(list):
     """Mal list type."""
 
     def __init__(self, value=[], meta=None):
-        super(MalList, self).__init__(value)
+        super(List, self).__init__(value)
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
@@ -30,13 +30,13 @@ class MalList(list):
         return '(' + ' '.join(items) + ')'
 
 
-class MalVector(list):
+class Vector(list):
     """Mal vector type."""
 
     def __init__(self, value=None, meta=None):
-        super(MalVector, self).__init__(value)
+        super(Vector, self).__init__(value)
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
@@ -48,15 +48,15 @@ class MalVector(list):
         return '[' + ' '.join(items) + ']'
 
 
-class MalHash(dict):
+class Hash(dict):
     """Mal hash table type."""
 
     def __init__(self, value=None, meta=None):
         if value is None:
             value = {}
-        super(MalHash, self).__init__(value)
+        super(Hash, self).__init__(value)
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
@@ -72,7 +72,7 @@ class MalHash(dict):
         return '{' + ' '.join(str_list) + '}'
 
 
-class MalError():
+class Error():
     """Mal error type.
 
     Errors are returned as normal values, but they halt evaluation and are
@@ -93,7 +93,7 @@ class MalError():
                 self.descr == other.descr)
 
 
-class MalHandledError(MalError):
+class HandledError(Error):
     """Mal handled error type.
 
     Errors handled by 'try*/catch*' are passed as handled errors, so that they
@@ -105,13 +105,13 @@ class MalHandledError(MalError):
         self.descr = error_object.descr
 
 
-# class MalString():
+# class String():
 #     """Mal string type."""
 
 #     def __init__(self, value="", meta=None):
 #         self.value = value
 #         if meta is None:
-#             meta = MAL_NIL
+#             meta = NIL
 #         self.meta = meta
 
 #     def __repr__(self):
@@ -126,13 +126,13 @@ class MalHandledError(MalError):
 #         return self.value
 
 
-class MalSymbol():
+class Symbol():
     """Mal symbol type."""
 
     def __init__(self, name, meta=None):
         self.name = name
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
@@ -144,7 +144,7 @@ class MalSymbol():
         return (self.name == other.name)
 
 
-class MalKeyword():
+class Keyword():
     """Mal keyword type. """
 
     def __init__(self, name, meta=None):
@@ -157,7 +157,7 @@ class MalKeyword():
             name = ':' + name
         self.name = name
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __eq__(self, other):
@@ -175,20 +175,20 @@ class MalKeyword():
         return self.name
 
 
-class MalBuiltin():
+class Builtin():
     """Mal builtin function type."""
 
     def __init__(self, fn=None, meta=None):
         self.fn = fn
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
         return "#<Builtin function at {}>".format(hex(id(self)))
 
 
-class MalFunction():
+class Function():
     """Mal function type."""
 
     def __init__(self, fn=None, params=None, ast=None, env=None,
@@ -199,7 +199,7 @@ class MalFunction():
         self.env = env
         self.is_macro = is_macro
         if meta is None:
-            meta = MAL_NIL
+            meta = NIL
         self.meta = meta
 
     def __repr__(self):
@@ -210,13 +210,13 @@ class MalFunction():
         return "#<User {} at {}>".format(fn_type, hex(id(self)))
 
 
-class MalBoolean():
+class Boolean():
     """Mal boolean type."""
 
     def __init__(self, value=False):
         # We check for False with 'is', because in Python, 0 is equal to, but
         # not identical with, False, while in Mal, 0 counts as true.
-        if value in [[], "", MalVector([]), MAL_NIL, {}] or value is False:
+        if value in [[], "", Vector([]), NIL, {}] or value is False:
             self.value = False
         else:
             self.value = True
@@ -233,12 +233,12 @@ class MalBoolean():
             return "false"
 
 
-class MalAtom():
+class Atom():
     """Mal atom type."""
 
     def __init__(self, value=None):
         if value is None:
-            value = MAL_NIL
+            value = NIL
         self.value = value
 
     def set(self, value):

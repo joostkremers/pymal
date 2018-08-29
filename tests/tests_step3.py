@@ -1,7 +1,6 @@
 import unittest
 
 import pymal
-from mal_types import *
 import core
 import mal_env as menv
 from eval_assert import EvalAssert
